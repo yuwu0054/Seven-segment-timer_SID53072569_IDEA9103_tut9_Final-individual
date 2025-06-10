@@ -16,21 +16,26 @@ function setup() {
   // Define angle options based on drawing mode
   let baseAngles;
   if (mode == 0) {
-    baseAngles = [0, 90, -90]; // cross pattern
-  } else if (mode == 1) {
-    baseAngles = [0];          // parallel horizontal lines
-  }
-
-  // Generate 100 line stripe objects
-  for (let i = 0; i < 100; i++) {
+    baseAngles = 90; // lines with 90-degree angles
     stripes.push(new LineStripe(
-      random(-rangeX, rangeX),          // x position
-      random(-rangeY, rangeY),          // y position
-      random(20, rangeLength),          // length of each line
-      random(0.1, 8),                   // spacing between lines
-      floor(random(6, 50)),             // number of lines in each stripe
-      random(baseAngles),               // angle of rotation
-      random(0.1, 1)                    // base stroke weight
+      windowWidth*0.12,                           // x position
+      windowHeight*0.36,                          // y position
+      windowHeight*0.08,                          // length of each line
+      (windowWidth*0.01)/(floor(random(6, 12))-1), // spacing between lines
+      floor(random(6, 12)),                       // number of lines in each stripe
+      baseAngles,                                 // angle of rotation
+      0.01                                        // base weight of the lines
+    ));
+  } else if (mode == 1) {
+    baseAngles = 0;          // parallel horizontal lines
+     stripes.push(new LineStripe(
+      windowWidth*0.12,                           // x position
+      windowHeight*0.36,                          // y position
+      windowHeight*0.08,                          // length of each line
+      (windowWidth*0.01)/(floor(random(6, 12))-1), // spacing between lines
+      floor(random(6, 12)),                       // number of lines in each stripe
+      baseAngles,                                 // angle of rotation
+      0.01                                        // base weight of the lines
     ));
   }
 }
@@ -98,6 +103,7 @@ function mousePressed() {
     currentStripe = 0;
     loop();
     setup();
+    loop();
   }
 }
 
@@ -108,6 +114,7 @@ function windowResized() {
   stripes = [];
   currentStripe = 0;
   setup(); // regenerate stripes on resize
+  loop();
 }
 
 // LineStripe class for generating and animating a set of lines
