@@ -17,7 +17,9 @@
 
 #### A short technical explanation
  ##### For the original randomly generated art, this code does not use the part where both sides are drawn toward the middle, and the lines appear directly, because this would make the logic more complicated.
- ##### I used tools and techniques outside of the course, which are indispensable. Regarding how it works, #### *I have provided detailed comments in the coding section.* ##### I would like to repost these URLs in this section. Thank you to the original authors or companies for sharing!
+ ##### I used tools and techniques outside of the course, which are indispensable. 
+ #### Regarding how it works, *I have provided detailed comments in the coding section.* 
+ ##### I would like to repost these URLs in this section. Thank you to the original authors or companies for sharing!
 
  1.```millis()```
 ##### -- https://p5js.org/zh-Hans/reference/p5/millis/
