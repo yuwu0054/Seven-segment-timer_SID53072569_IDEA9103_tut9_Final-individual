@@ -10,10 +10,20 @@ let colon = []; // Array to store the colon position
 let colonStripes; // fixed LineStripe object for the colon
 
 
+let clockIsRunning = false; // Flag to control clock running state
+let startTime=0; // Variable to store the start time
+let pausedTime=0; // Variable to store the paused time
+let resetTime = 0; // Variable to store the reset time
+
+
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   angleMode(DEGREES);
+
+  // The function of millis is from -- https://p5js.org/zh-Hans/reference/p5/millis/
+  startTime = millis(); // Initialize start time
+  resetTime = millis(); // Initialize reset time
 
   let baseSize = min(width, height) ;//Which is smaller, width or height of the window?
   
@@ -71,7 +81,13 @@ function draw() {
   frameRate(60); // Set frame rate to 60 FPS
   background(240, 240, 225); // Clear the canvas
   
-  let totalTime = millis(); // The function of millis is from -- https://p5js.org/zh-Hans/reference/p5/millis/
+  let totalTime  
+  if (clockIsRunning == true){
+    totalTime = millis()- resetTime - pausedTime; // Calculate total time since start, minus any paused time
+  }else {
+    totalTime = startTime - resetTime - pausedTime; // If clock is not running, calculate time since reset
+  }  
+    
   let totalSeconds = floor(totalTime / 1000); // Convert milliseconds to seconds
   let minutes = floor(totalSeconds / 60); // Calculate minutes
   let seconds = totalSeconds % 60; // Calculate remaining seconds
@@ -96,7 +112,7 @@ function draw() {
   colonStripes.lower.gray = 60; // Set the color to gray for visibility
   colonStripes.lower.displayStep(); // Draw the lower colon stripe
 
-  drawModeButton(); // Draw UI button
+  drawControlButtons(); // Draw UI button
 }
 
 function initializeArray() {
@@ -234,7 +250,7 @@ class SevenSegmentDisplay {
         len * 0.05, // Spacing between lines, using length proportion instead of fixed value
         floor(random(3, 5)), 
         angle, 
-        w*(random(0.01, 0.03)) //
+        w*(random(0.01, 0.03)) 
       );
     }
   }
@@ -262,61 +278,86 @@ class SevenSegmentDisplay {
     }
     stripe.displayStep(); // Draw the segment
     }
-  }
+}
 
+function drawButton(x,y,w,h,buttonText) {
+ 
+  fill(255,230,180, 220); // Set button color with transparency
+  stroke(120); // Set stroke color
+  strokeWeight(2); // Set stroke weight
+  rect(x, y, w, h, 12); // Draw rectangle with rounded corners
 
+  fill(60); // Set text color
+  noStroke(); // No stroke for text
+  textSize(h * 0.45); // Set font size relative to button height
+  textAlign(CENTER, CENTER); // Center align text
+  text(buttonText, x + w / 2, y + h / 2); // Draw button text
+}
 
-
-
-// Draws a button at the bottom left corner to toggle drawing mode
-function drawModeButton() {
+function drawControlButtons() {
   push();
   resetMatrix();//
   // Button position and size adapt to the canvas
   let margin = 0.025 * min(width, height); 
   let btnW = 0.25 * width;   
   let btnH = 0.06 * height;  
-  let x = margin;
+  let x = 0.1 * width; // Starting X position for buttons
   let y = height - btnH - margin;
-
-  fill(255, 230, 180, 220);
-  stroke(120);
-  strokeWeight(2);
-  rect(x, y, btnW, btnH, 12);
-
-  fill(60);
-  noStroke();
-  textSize(btnH * 0.45); // The font size changes according to the height of the button
-  textAlign(CENTER, CENTER);
-  text(
-    mode === 1 ? "Switch to cross" : "Switch to parallel",
-    x + btnW / 2,
-    y + btnH / 2
-  );
+  let btnSpacing = btnW + margin; // Spacing between buttons
+  
+  drawButton(x, y, btnW, btnH,"START");
+  drawButton(x + btnSpacing, y, btnW, btnH,"PAUSE");
+  drawButton(x + btnSpacing*2, y, btnW, btnH,"RESET");
   pop();
 }
 
-// Handle mouse click for toggling modes
+function startTimer() {
+  if (clockIsRunning == false) {
+    // If the clock is not running, start it
+      pausedTime = pausedTime + millis() - startTime; // Update paused time
+      clockIsRunning = true; // Set the flag to true to start the clock
+   
+    
+  }
+}
+
+function resetTimer() {
+  resetTime = millis(); // Update reset time to current time
+  pausedTime = 0;
+  startTime = millis(); // Update start time to current time
+  clockIsRunning = false; // Set the flag to false to pause the clock
+
+}
+
+function pauseTimer() {
+  if (clockIsRunning == true) {
+    // If the clock is not running, start it
+      startTime = millis(); // Update start time to current time
+      clockIsRunning = false; // Set the flag to true to start the clock
+  }
+ 
+  
+}
+
+// Handle mouse press events for button clicks
 function mousePressed() {
   let margin = 0.025 * min(width, height);
   let btnW = 0.25 * width;
   let btnH = 0.06 * height;
-  let x = margin;
+  let x = 0.1 * width;
   let y = height - btnH - margin;
+  let btnSpacing = btnW + margin; // Spacing between buttons
 
-  if (
-    mouseX >= x && mouseX <= x + btnW &&
-    mouseY >= y && mouseY <= y + btnH
-  ) {
-    mode = mode === 1 ? 0 : 1;
-
-    // Reset everything and rerun setup
-    stripes = [];
-    currentStripe = 0;
-    loop();
-    setup();
-    loop(); // Restart the draw loop
+  if (mouseY >= y && mouseY <= y + btnH){
+    if (mouseX >= x && mouseX <= x + btnW) {
+      startTimer(); // Start the timer when the first button is clicked
+    } else if (mouseX >= x + btnSpacing && mouseX <= x + btnSpacing + btnW) {
+      pauseTimer(); // Pause the timer when the second button is clicked
+    } else if (mouseX >= x + btnSpacing * 2 && mouseX <= x + btnSpacing * 2 + btnW) {
+      resetTimer(); // Reset the timer when the third button is clicked
+    }
   }
+
 }
 
 // Handle window resize
@@ -327,10 +368,7 @@ function windowResized() {
   currentStripe = 0;
   sevenSegmentDisplay = [];// 🔴Reset the seven-segment display
   setup(); // regenerate stripes on resize
-  loop(); // Restart the draw loop
 }
-
-
 
 // LineStripe class for generating and animating a set of lines
 //🔴Change the angle
