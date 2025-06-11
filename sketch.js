@@ -7,27 +7,59 @@ let sevenSegmentDisplay = []; // Array to store the seven-segment display object
 let number;                 // Array to store the seven-segment display objects
 
 let colon = []; // Array to store the colon position
+let colonStripes; // fixed LineStripe object for the colon
+
 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   angleMode(DEGREES);
-  
 
-  let startX =250 //Starting X position for the number of minutes (ten digit)
-  let spacing = 100; // Spacing between the numbers
+  let baseSize = min(width, height) ;//Which is smaller, width or height of the window?
+  
+  let numberWidth = baseSize*0.12;  // Width of each number segment
+  let numberHeight = baseSize*0.18;// Height of each number segment
+  let numberSpacing = numberWidth*1.25; // Spacing between the numbers
+  
+  let totalWidth = numberSpacing * 4 + numberWidth * 0.5; // Total width for four digits and three spacings
+  let startX =(width - totalWidth)/2; //Starting X position for the number of minutes (ten digit)
+  let startY = height / 2 - numberHeight / 2; // Starting Y position for the number of minutes
+
+  
 
   for (let i = 0; i < 4; i++) { //There are 4 digits in the seven-segment display
 
-    let x = startX + i * spacing; // Calculate x position for each digit
+    let x = startX + i * numberSpacing; // Calculate x position for each digit
+    if (i >= 2) {x = x + numberWidth*0.5}; // Add extra spacing for the colon between minutes and seconds
 
-    sevenSegmentDisplay.push(new SevenSegmentDisplay(x,height/2-50,80,100)); 
+    sevenSegmentDisplay.push(new SevenSegmentDisplay(x,startY,numberWidth,numberHeight)); 
     //sevenSegmentDisplay[0] = new SevenSegmentDisplay(x, height / 2 - 50, 80, 100);
     //sevenSegmentDisplay[1] = new SevenSegmentDisplay(x + spacing, height / 2 - 50, 80, 100);
     //sevenSegmentDisplay[2] = new SevenSegmentDisplay(x + spacing * 2, height / 2 - 50, 80, 100);
     //sevenSegmentDisplay[3] = new SevenSegmentDisplay(x + spacing * 3, height / 2 - 50, 80, 100);
   };
 
+  colon[0] = startX + 2 * numberSpacing + numberWidth*0.2; // Position for the colon between minutes and seconds
+  //in case need to use colon between mins and hours in the future
+
+  colonStripes = {
+    upper: new LineStripe(
+      colon[0], height / 2 - numberHeight*0.2,    // x, y position
+      width * 0.005,                // length - using window width proportion
+      width * 0.002,                // spacing - using window width proportion
+      3,                            // count - fixed number of lines
+      0,                            // angle
+      width * 0.003                 // baseWeight - using window width proportion
+    ),
+    lower: new LineStripe(
+      colon[0], height / 2 + numberHeight*0.2,    // x, y position
+      width * 0.005,                // length - using window width proportion
+      width * 0.002,                // spacing - using window width proportion
+      3,                            // count - fixed number of lines
+      0,                            // angle
+      width * 0.003                 // baseWeight - using window width proportion
+    )
+  };
   number = new Array(10); //Create an array to store the numbers 0-9
   initializeArray(); //fill the lights of the seven-segment display. The Function will be defines later.
   //These two lines reference this site-- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/.
@@ -56,6 +88,13 @@ function draw() {
   sevenSegmentDisplay[2].show(number[sec[0]]); // Show the first digit of seconds
   sevenSegmentDisplay[3].show(number[sec[1]]); // Show the second digit of seconds
 
+  colonStripes.upper.currentLen = colonStripes.upper.len; // Set the upper colon stripe to full length
+  colonStripes.upper.gray = 60; // Set the color to gray for visibility
+  colonStripes.upper.displayStep(); // Draw the upper colon stripe
+
+  colonStripes.lower.currentLen = colonStripes.lower.len; // Set the lower colon stripe to full length
+  colonStripes.lower.gray = 60; // Set the color to gray for visibility
+  colonStripes.lower.displayStep(); // Draw the lower colon stripe
 
   drawModeButton(); // Draw UI button
 }
@@ -159,7 +198,17 @@ class SevenSegmentDisplay {
     
     for (let i = 0; i < Object.keys(this.coords).length; i++) {
       let segment = Object.keys(this.coords)[i];
+       //TEST
+        console.log(`segment: = Object.keys(this.coords)[i] = "${segment}"`); 
+        /*should do it for 7 times
+          e.g. segment = Object.keys(this.coords)[0] = "a",
+               segment = Object.keys(this.coords)[1] = "b", etc. */
+
       let coord = this.coords[segment];
+        // Get the coordinates for the current segment
+        //e.g. coords = this.coords["a"] = [x + this.gap, y, x + this.gap + this.segmentLength,  y   ]
+
+      
       
       let x1 = coord[0]; //e.g. x1 = x + this.gap 
       let y1 = coord[1]; //e.g. y1 = y 
@@ -185,7 +234,7 @@ class SevenSegmentDisplay {
         len * 0.05, // Spacing between lines, using length proportion instead of fixed value
         floor(random(3, 5)), 
         angle, 
-        w*(random(0.01, 0.03)) 
+        w*(random(0.01, 0.03)) //
       );
     }
   }
@@ -217,7 +266,6 @@ class SevenSegmentDisplay {
 
 
 
-  sevenSegmentDisplay[1].show(number[min[1]]); // Show the second digit of minutes
 
 
 // Draws a button at the bottom left corner to toggle drawing mode
@@ -277,6 +325,7 @@ function windowResized() {
   background(240, 240, 225); 
   stripes = [];
   currentStripe = 0;
+  sevenSegmentDisplay = [];// 🔴Reset the seven-segment display
   setup(); // regenerate stripes on resize
   loop(); // Restart the draw loop
 }
