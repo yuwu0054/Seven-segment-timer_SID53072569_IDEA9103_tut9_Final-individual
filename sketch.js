@@ -280,9 +280,13 @@ class SevenSegmentDisplay {
     }
 }
 
-function drawButton(x,y,w,h,buttonText) {
- 
-  fill(255,230,180, 220); // Set button color with transparency
+function drawButton(x,y,w,h,buttonText, isHovered = false) {
+  if (isHovered == true) {
+    fill(255, 200, 120, 240); // Change color when hovered
+  }
+  else {
+  fill(255, 230, 180, 220); // Set button color with transparency
+  }
   stroke(120); // Set stroke color
   strokeWeight(2); // Set stroke weight
   rect(x, y, w, h, 12); // Draw rectangle with rounded corners
@@ -292,6 +296,13 @@ function drawButton(x,y,w,h,buttonText) {
   textSize(h * 0.45); // Set font size relative to button height
   textAlign(CENTER, CENTER); // Center align text
   text(buttonText, x + w / 2, y + h / 2); // Draw button text
+  
+}
+
+function mouseIsOnTheButton(buttonX, buttonY, buttonW, buttonH) {
+  // Check if the mouse is within the button's bounds
+  return mouseX >= buttonX && mouseX <= buttonX + buttonW &&
+         mouseY >= buttonY && mouseY <= buttonY + buttonH;
 }
 
 function drawControlButtons() {
@@ -305,9 +316,13 @@ function drawControlButtons() {
   let y = height - btnH - margin;
   let btnSpacing = btnW + margin; // Spacing between buttons
   
-  drawButton(x, y, btnW, btnH,"START");
-  drawButton(x + btnSpacing, y, btnW, btnH,"PAUSE");
-  drawButton(x + btnSpacing*2, y, btnW, btnH,"RESET");
+  let startHovered = mouseIsOnTheButton(x, y, btnW, btnH); // Check if the "START" button is hovered
+  let pauseHovered = mouseIsOnTheButton(x + btnSpacing, y, btnW, btnH); // Check if the "PAUSE" button is hovered
+  let resetHovered = mouseIsOnTheButton(x + btnSpacing * 2, y, btnW, btnH); // Check if the "RESET" button is hovered
+
+  drawButton(x, y, btnW, btnH,"START",startHovered);
+  drawButton(x + btnSpacing, y, btnW, btnH,"PAUSE",pauseHovered);
+  drawButton(x + btnSpacing*2, y, btnW, btnH,"RESET",resetHovered);
   pop();
 }
 
