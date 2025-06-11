@@ -25,17 +25,39 @@ function setup() {
     //sevenSegmentDisplay[1] = new SevenSegmentDisplay(x + spacing, height / 2 - 50, 80, 100);
     //sevenSegmentDisplay[2] = new SevenSegmentDisplay(x + spacing * 2, height / 2 - 50, 80, 100);
     //sevenSegmentDisplay[3] = new SevenSegmentDisplay(x + spacing * 3, height / 2 - 50, 80, 100);
+  };
 
-    number = new Array(10); //Create an array to store the numbers 0-9
-    initializeArray(); //fill the lights of the seven-segment display. The Function will be defines later.
-    //These two lines reference this site-- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/.
-    //The following code will also be used subsequently for tips on this website.
+  number = new Array(10); //Create an array to store the numbers 0-9
+  initializeArray(); //fill the lights of the seven-segment display. The Function will be defines later.
+  //These two lines reference this site-- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/.
+  //The following code will also be used subsequently for tips on this website.
 
+}
 
-
-    
+function draw() {
+  frameRate(60); // Set frame rate to 60 FPS
+  background(240, 240, 225); // Clear the canvas
   
-}}
+  let totalTime = millis(); // The function of millis is from -- https://p5js.org/zh-Hans/reference/p5/millis/
+  let totalSeconds = floor(totalTime / 1000); // Convert milliseconds to seconds
+  let minutes = floor(totalSeconds / 60); // Calculate minutes
+  let seconds = totalSeconds % 60; // Calculate remaining seconds
+
+  //transfer to two-digit format for minutes and seconds
+  //The idea is from -- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/
+  //The use of slice(-2) id from -- https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
+  let min = ("0" + minutes).slice(-2);// e.g.min = "0" +5   → "05",   "05".slice(-2) → "05"
+  let sec = ("0" + seconds).slice(-2);// e.g.sec = "0" + 12 → "012", "012".slice(-2) → "12"
+
+  //show() function is written in the class SevenSegmentDisplay.
+  sevenSegmentDisplay[0].show(number[min[0]]); // Show the first digit of minutes
+  sevenSegmentDisplay[1].show(number[min[1]]); // Show the second digit of minutes
+  sevenSegmentDisplay[2].show(number[sec[0]]); // Show the first digit of seconds
+  sevenSegmentDisplay[3].show(number[sec[1]]); // Show the second digit of seconds
+
+
+  drawModeButton(); // Draw UI button
+}
 
 function initializeArray() {
   // Initialize the number array with the segments for each digit
@@ -79,39 +101,39 @@ class SevenSegmentDisplay {
 
     this.coords = {//这段坐标还要调整一下现在有点乱
       //a
-      a:[ x + this.gap - h/20, 
-          y - h/20, 
-          x + this.gap -h/20 + this.segmentLength,  
-          y - h/20  ], 
+      a:[ x + this.gap  , 
+          y , 
+          x + this.gap + this.segmentLength  ,  
+          y   ], 
       //b
-      b:[ x + this.gap + this.segmentLength, 
-          y - h/20, 
-          x + this.gap + this.segmentLength, 
+      b:[ x + this.gap + this.segmentLength  , 
+          y - h/20 , 
+          x + this.gap + this.segmentLength , 
           y + h/2 - h/20 ],
       //c
-      c:[ x + this.gap + this.segmentLength, 
-          y + h/2 - h/20, 
-          x + this.gap - h/20, 
+      c:[ x + this.gap + this.segmentLength , 
+          y + h/2 - h/20 , 
+          x + this.gap + this.segmentLength , 
           y + h - h/20 ],
       //d
-      d:[ x + this.gap, 
-          y + h, 
-          x + this.gap , 
+      d:[ x + this.gap  , 
+          y + h , 
+          x + this.gap + this.segmentLength   , 
           y + h ],
       //e
       e:[ x + this.gap , 
-          y + h/2, 
+          y + h/2 - h/20 , 
           x + this.gap , 
-          y + h],
+          y + h - h/20 ],
       //f
-      f:[ x + this.gap,
-          y , 
-          x + this.gap, 
-          y + h/2],
+      f:[ x + this.gap ,
+          y  - h/20 , 
+          x + this.gap , 
+          y + h/2 - h/20 ],
       //g
-      g:[ x + this.gap, 
-          y + h/2, 
-          x + this.gap + this.segmentLength, 
+      g:[ x + this.gap  , 
+          y + h/2 , 
+          x + this.gap + this.segmentLength  , 
           y + h/2 ]
     };
 
@@ -138,10 +160,10 @@ class SevenSegmentDisplay {
       let segment = Object.keys(this.coords)[i];
       let coord = this.coords[segment];
       
-      let x1 = coord[0]; //e.g. x1 = x + this.gap - h/20
-      let y1 = coord[1]; //e.g. y1 = y - h/20
+      let x1 = coord[0]; //e.g. x1 = x + this.gap 
+      let y1 = coord[1]; //e.g. y1 = y 
       let x2 = coord[2]; //e.g. x2 = x + this.gap -h/20 + this.segmentLength
-      let y2 = coord[3]; //e.g. y2 = y - h/20
+      let y2 = coord[3]; //e.g. y2 = y 
       let len = dist(x1, y1, x2, y2); // Calculate the length of the segment. 
         /*The previous segment Length was just the line segnment being drawn.
           But since he coordinates were fine-tuned to avoid the lines being glued together, the value has changed.
@@ -158,11 +180,11 @@ class SevenSegmentDisplay {
         // Create a new LineStripe for each segment
         x1, 
         y1, 
-        len, 
-        1,
-        floor(random(4, 8)), 
+        len - this.gap, 
+        len * 0.05, // Spacing between lines, using length proportion instead of fixed value
+        floor(random(3, 5)), 
         angle, 
-        w*0.02 
+        w*(random(0.01, 0.03)) 
       );
     }
   }
@@ -183,10 +205,9 @@ class SevenSegmentDisplay {
     let stripe = this.stripes[segment]; // Get the LineStripe object for the segment
     stripe.currentLen = stripe.len; // Set the current length to the full length of the segment
     if(flag == 1) { // If the segment is on
-      let grayValue = random(10, 200); // Random grayscale value for the segment 
-      stripe.color = [grayValue, grayValue, grayValue]; // Convert to RGB color
+      stripe.gray = 60; // Convert to RGB color
     }else {
-      stripe.color = [240, 240, 225]; // Still draw the segment, but with the background color, invisible
+      stripe.gray = 240; // Still draw the segment, but with the color is similar to the background, almost invisible.
       
     }
     stripe.displayStep(); // Draw the segment
@@ -194,32 +215,10 @@ class SevenSegmentDisplay {
   }
 
 
-//Delete something that is not used
-function draw() {
-  frameRate(60); // Set frame rate to 60 FPS
-  background(240, 240, 225); // Clear the canvas
-  
-  let totalTime = millis(); // The function of millis is from -- https://p5js.org/zh-Hans/reference/p5/millis/
-  let totalSeconds = floor(totalTime / 1000); // Convert milliseconds to seconds
-  let minutes = floor(totalSeconds / 60); // Calculate minutes
-  let seconds = totalSeconds % 60; // Calculate remaining seconds
 
-  //transfer to two-digit format for minutes and seconds
-  //The idea is from -- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/
-  //The use of slice(-2) id from -- https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
-  let min = ("0" + minutes).slice(-2);// e.g.min = "0" +5   → "05",   "05".slice(-2) → "05"
-  let sec = ("0" + seconds).slice(-2);// e.g.sec = "0" + 12 → "012", "012".slice(-2) → "12"
-
-  //show() function is written in the class SevenSegmentDisplay.
-  sevenSegmentDisplay[0].show(number[min[0]]); // Show the first digit of minutes
   sevenSegmentDisplay[1].show(number[min[1]]); // Show the second digit of minutes
-  sevenSegmentDisplay[2].show(number[sec[0]]); // Show the first digit of seconds
-  sevenSegmentDisplay[3].show(number[sec[1]]); // Show the second digit of seconds
 
 
-  drawModeButton(); // Draw UI button
-}
-/*
 // Draws a button at the bottom left corner to toggle drawing mode
 function drawModeButton() {
   push();
@@ -280,7 +279,9 @@ function windowResized() {
   setup(); // regenerate stripes on resize
   loop(); // Restart the draw loop
 }
-*/
+
+
+
 // LineStripe class for generating and animating a set of lines
 //🔴Change the angle
 class LineStripe {
@@ -295,9 +296,7 @@ class LineStripe {
     this.lines = [];                   //Array to store the lines
     this.done = false;                 //Flag to indicate if the stripe is fully drawn
     this.currentLen = 0;               //Current line length  
-    //change
-    this.color = [random(0, 255), random(0, 255), random(0, 255)]; // Random RGB color for the line
-    //🔴delete "this.gray = random(10, 200);       //grayscale base color"
+    this.gray = random(10, 200);       //grayscale base color"
 
     // Initialize each line’s parameters
     for (let i = 0; i < this.count; i++) {
@@ -322,7 +321,7 @@ class LineStripe {
     // Draw each line segment with dynamic length
     for (let i = 0; i < this.lines.length; i++) {
       let l = this.lines[i];
-      stroke(this.color[0],this.color[1],this.color[2], l.opacity);// meet the requirement of background color
+      stroke(this.gray, l.opacity);// meet the requirement of background color
       strokeWeight(l.weight);
       
       //Decide the growing direction of line based on mode
