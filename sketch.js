@@ -6,6 +6,7 @@ let mode = 1;               // Drawing mode: 0 = cross pattern, 1 = parallel lin
 let sevenSegmentDisplay = []; // Array to store the seven-segment display objects
 let number;                 // Array to store the seven-segment display objects
 
+let colon = []; // Array to store the colon position
 
 
 function setup() {
