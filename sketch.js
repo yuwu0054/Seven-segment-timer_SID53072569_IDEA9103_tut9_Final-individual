@@ -3,59 +3,223 @@ let currentStripe = 0;      // Index of the current stripe being animated
 
 let mode = 1;               // Drawing mode: 0 = cross pattern, 1 = parallel lines
 
+let sevenSegmentDisplay = []; // Array to store the seven-segment display objects
+let number;                 // Array to store the seven-segment display objects
+
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   angleMode(DEGREES);
-  background(240, 240, 225);
+  
 
-  // Define ranges for stripe placement
-  let rangeX = windowWidth * 0.3;
-  let rangeY = windowHeight * 0.3;
-  let rangeLength = windowWidth * 0.5;
+  let startX =250 //Starting X position for the number of minutes (ten digit)
+  let spacing = 100; // Spacing between the numbers
 
-  // Define angle options based on drawing mode
-  let baseAngles;
-  if (mode == 0) {
-    baseAngles = 90; // lines with 90-degree angles
-    stripes.push(new LineStripe(
-      windowWidth*0.12,                           // x position
-      windowHeight*0.36,                          // y position
-      windowHeight*0.08,                          // length of each line
-      (windowWidth*0.01)/(floor(random(6, 12))-1), // spacing between lines
-      floor(random(6, 12)),                       // number of lines in each stripe
-      baseAngles,                                 // angle of rotation
-      0.01                                        // base weight of the lines
-    ));
-  } else if (mode == 1) {
-    baseAngles = 0;          // parallel horizontal lines
-     stripes.push(new LineStripe(
-      windowWidth*0.12,                           // x position
-      windowHeight*0.36,                          // y position
-      windowHeight*0.08,                          // length of each line
-      (windowWidth*0.01)/(floor(random(6, 12))-1), // spacing between lines
-      floor(random(6, 12)),                       // number of lines in each stripe
-      baseAngles,                                 // angle of rotation
-      0.01                                        // base weight of the lines
-    ));
-  }
+  for (let i = 0; i < 4; i++) { //There are 4 digits in the seven-segment display
+
+    let x = startX + i * spacing; // Calculate x position for each digit
+
+    sevenSegmentDisplay.push(new SevenSegmentDisplay(x,height/2-50,80,100)); 
+    //sevenSegmentDisplay[0] = new SevenSegmentDisplay(x, height / 2 - 50, 80, 100);
+    //sevenSegmentDisplay[1] = new SevenSegmentDisplay(x + spacing, height / 2 - 50, 80, 100);
+    //sevenSegmentDisplay[2] = new SevenSegmentDisplay(x + spacing * 2, height / 2 - 50, 80, 100);
+    //sevenSegmentDisplay[3] = new SevenSegmentDisplay(x + spacing * 3, height / 2 - 50, 80, 100);
+
+    number = new Array(10); //Create an array to store the numbers 0-9
+    initializeArray(); //fill the lights of the seven-segment display. The Function will be defines later.
+    //These two lines reference this site-- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/.
+    //The following code will also be used subsequently for tips on this website.
+
+
+
+    
+  
+}}
+
+function initializeArray() {
+  // Initialize the number array with the segments for each digit
+
+  //  f  aaa  b
+  //  f       b
+  //  f       b
+  //     ggg
+  //  e       c
+  //  e       c
+  //  e  ddd  c
+ 
+  //In the order number[i] = [a,b,c,d,e,f,g]
+  //If the segment is on, it is 1, and filled with gray color
+  //If the segment is off, it is 0, and filled with (240, 240, 225), which is the background color.
+
+  number[0] = [1, 1, 1, 1, 1, 1, 0]; // 0
+  number[1] = [0, 1, 1, 0, 0, 0, 0]; // 1
+  number[2] = [1, 1, 0, 1, 1, 0, 1]; // 2
+  number[3] = [1, 1, 1, 1, 0, 0, 1]; // 3
+  number[4] = [0, 1, 1, 0, 0, 1, 1]; // 4
+  number[5] = [1, 0, 1, 1, 0, 1, 1]; // 5
+  number[6] = [1, 0, 1, 1, 1, 1, 1]; // 6
+  number[7] = [1, 1, 1, 0, 0, 0, 0]; // 7 
+  number[8] = [1, 1, 1, 1, 1, 1, 1]; // 8
+  number[9] = [1, 1, 1, 1, 0, 1, 1]; // 9   
+  
 }
 
-function draw() {
-  translate(width / 2, height / 2);  
+class SevenSegmentDisplay {
+  constructor(x, y, w, h) {
+    this.x = x; // X position of the display
+    this.y = y; // Y position of the display
+    this.w = w; // Width of the display
+    this.h = h; // Height of the display
 
-  // Animate stripes one at a time
-  if (currentStripe < stripes.length) {
-    stripes[currentStripe].displayStep();
-    if (stripes[currentStripe].done) {
-      currentStripe++;
+    
+
+    this.segmentLength = w*0.7; // Length of each segment
+    this.gap = w*0.1; // Spacing between segments. The"spacing" has been used in function setup().  For the sake of clarity, we use gap here.
+
+    this.coords = {//这段坐标还要调整一下现在有点乱
+      //a
+      a:[ x + this.gap - h/20, 
+          y - h/20, 
+          x + this.gap -h/20 + this.segmentLength,  
+          y - h/20  ], 
+      //b
+      b:[ x + this.gap + this.segmentLength, 
+          y - h/20, 
+          x + this.gap + this.segmentLength, 
+          y + h/2 - h/20 ],
+      //c
+      c:[ x + this.gap + this.segmentLength, 
+          y + h/2 - h/20, 
+          x + this.gap - h/20, 
+          y + h - h/20 ],
+      //d
+      d:[ x + this.gap, 
+          y + h, 
+          x + this.gap , 
+          y + h ],
+      //e
+      e:[ x + this.gap , 
+          y + h/2, 
+          x + this.gap , 
+          y + h],
+      //f
+      f:[ x + this.gap,
+          y , 
+          x + this.gap, 
+          y + h/2],
+      //g
+      g:[ x + this.gap, 
+          y + h/2, 
+          x + this.gap + this.segmentLength, 
+          y + h/2 ]
+    };
+
+    //TEST
+    console.log(`a段坐标: [${this.coords.a}]`),
+    console.log(`b段坐标: [${this.coords.b}]`),
+    console.log(`c段坐标: [${this.coords.c}]`),
+    console.log(`d段坐标: [${this.coords.d}]`),
+    console.log(`e段坐标: [${this.coords.e}]`),
+    console.log(`f段坐标: [${this.coords.f}]`),
+    console.log(`g段坐标: [${this.coords.g}]`);   
+
+    this.stripes = {}; // Object to store LineStripe objects for each segment
+    let segments = Object.keys(this.coords); 
+    /* Get the keys of the coordinates object, which are the segment names (a, b, c, d, e, f, g)
+     In order to get the coordinates and the status of one of the seven segments later, I reference this feature.
+     Object.key()
+     https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/keys */
+
+    //TEST
+        console.log(segments); //should show ["a", "b", "c", "d", "e", "f", "g"]
+    
+    for (let i = 0; i < Object.keys(this.coords).length; i++) {
+      let segment = Object.keys(this.coords)[i];
+      let coord = this.coords[segment];
+      
+      let x1 = coord[0]; //e.g. x1 = x + this.gap - h/20
+      let y1 = coord[1]; //e.g. y1 = y - h/20
+      let x2 = coord[2]; //e.g. x2 = x + this.gap -h/20 + this.segmentLength
+      let y2 = coord[3]; //e.g. y2 = y - h/20
+      let len = dist(x1, y1, x2, y2); // Calculate the length of the segment. 
+        /*The previous segment Length was just the line segnment being drawn.
+          But since he coordinates were fine-tuned to avoid the lines being glued together, the value has changed.
+          We need to recalculate the length of the segment.*/
+
+      let angle = 0; // Initialize angle to 0
+      if (x1 === x2) {
+        angle = 90; // Vertical segment
+      } else if (y1 === y2) {
+        angle = 0; // Horizontal segment
+      } 
+
+      this.stripes[segment] = new LineStripe(//(x, y, len, spacing, count, angle, baseWeight)
+        // Create a new LineStripe for each segment
+        x1, 
+        y1, 
+        len, 
+        1,
+        floor(random(4, 8)), 
+        angle, 
+        w*0.02 
+      );
     }
-  } else {
-    noLoop(); // Stop drawing once all stripes are done
   }
+
+  show(segments) {
+    //Used the website mentioned before.
+    //https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/
+    this.edge('a', segments[0]); // a segment: top horizontal line
+    //segments[0] controls whether a is on or off.
+    this.edge('b', segments[1]); // b segment: top right vertical line
+    this.edge('c', segments[2]); // c segment: bottom right vertical line     
+    this.edge('d', segments[3]); // d segment: bottom horizontal line
+    this.edge('e', segments[4]); // e segment: bottom left vertical line
+    this.edge('f', segments[5]); // f segment: top left vertical line
+    this.edge('g', segments[6]); // g segment: middle horizontal line
+  }
+  edge(segment, flag) {
+    let stripe = this.stripes[segment]; // Get the LineStripe object for the segment
+    stripe.currentLen = stripe.len; // Set the current length to the full length of the segment
+    if(flag == 1) { // If the segment is on
+      let grayValue = random(10, 200); // Random grayscale value for the segment 
+      stripe.color = [grayValue, grayValue, grayValue]; // Convert to RGB color
+    }else {
+      stripe.color = [240, 240, 225]; // Still draw the segment, but with the background color, invisible
+      
+    }
+    stripe.displayStep(); // Draw the segment
+    }
+  }
+
+
+//Delete something that is not used
+function draw() {
+  frameRate(60); // Set frame rate to 60 FPS
+  background(240, 240, 225); // Clear the canvas
+  
+  let totalTime = millis(); // The function of millis is from -- https://p5js.org/zh-Hans/reference/p5/millis/
+  let totalSeconds = floor(totalTime / 1000); // Convert milliseconds to seconds
+  let minutes = floor(totalSeconds / 60); // Calculate minutes
+  let seconds = totalSeconds % 60; // Calculate remaining seconds
+
+  //transfer to two-digit format for minutes and seconds
+  //The idea is from -- https://www.geeksforgeeks.org/how-to-create-seven-segment-clock-using-p5-js-library/
+  //The use of slice(-2) id from -- https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
+  let min = ("0" + minutes).slice(-2);// e.g.min = "0" +5   → "05",   "05".slice(-2) → "05"
+  let sec = ("0" + seconds).slice(-2);// e.g.sec = "0" + 12 → "012", "012".slice(-2) → "12"
+
+  //show() function is written in the class SevenSegmentDisplay.
+  sevenSegmentDisplay[0].show(number[min[0]]); // Show the first digit of minutes
+  sevenSegmentDisplay[1].show(number[min[1]]); // Show the second digit of minutes
+  sevenSegmentDisplay[2].show(number[sec[0]]); // Show the first digit of seconds
+  sevenSegmentDisplay[3].show(number[sec[1]]); // Show the second digit of seconds
+
 
   drawModeButton(); // Draw UI button
 }
-
+/*
 // Draws a button at the bottom left corner to toggle drawing mode
 function drawModeButton() {
   push();
@@ -103,7 +267,7 @@ function mousePressed() {
     currentStripe = 0;
     loop();
     setup();
-    loop();
+    loop(); // Restart the draw loop
   }
 }
 
@@ -114,10 +278,11 @@ function windowResized() {
   stripes = [];
   currentStripe = 0;
   setup(); // regenerate stripes on resize
-  loop();
+  loop(); // Restart the draw loop
 }
-
+*/
 // LineStripe class for generating and animating a set of lines
+//🔴Change the angle
 class LineStripe {
   constructor(x, y, len, spacing, count, angle, baseWeight) {   
     this.x = x;                        //Position of line
@@ -130,7 +295,9 @@ class LineStripe {
     this.lines = [];                   //Array to store the lines
     this.done = false;                 //Flag to indicate if the stripe is fully drawn
     this.currentLen = 0;               //Current line length  
-    this.gray = random(10, 200);       //grayscale base color
+    //change
+    this.color = [random(0, 255), random(0, 255), random(0, 255)]; // Random RGB color for the line
+    //🔴delete "this.gray = random(10, 200);       //grayscale base color"
 
     // Initialize each line’s parameters
     for (let i = 0; i < this.count; i++) {
@@ -146,12 +313,16 @@ class LineStripe {
   displayStep() {
     push();
     translate(this.x, this.y);
-    rotate(-this.angle);
+    rotate(this.angle);//🔴🔴🔴!!!!!!!!This is very very very important!!!!
+    // I changed the original "-this.angle" to "this.angle" to make the lines grow in the correct direction.
+    //Exhausted hours of debugging, and finally found this issue.
+    //At first, I thought only line segment a was wrong, but later I found that all the horizontal line segments were wrong:(
+
 
     // Draw each line segment with dynamic length
     for (let i = 0; i < this.lines.length; i++) {
       let l = this.lines[i];
-      stroke(this.gray, l.opacity);
+      stroke(this.color[0],this.color[1],this.color[2], l.opacity);// meet the requirement of background color
       strokeWeight(l.weight);
       
       //Decide the growing direction of line based on mode
