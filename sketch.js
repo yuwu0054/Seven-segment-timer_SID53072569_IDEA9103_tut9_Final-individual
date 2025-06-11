@@ -49,7 +49,7 @@ function setup() {
     //sevenSegmentDisplay[3] = new SevenSegmentDisplay(x + spacing * 3, height / 2 - 50, 80, 100);
   };
 
-  colon[0] = startX + 2 * numberSpacing + numberWidth*0.2; // Position for the colon between minutes and seconds
+  colon[0] = startX + 2 * numberSpacing + numberWidth*0.01; // Position for the colon between minutes and seconds
   //in case need to use colon between mins and hours in the future
 
   colonStripes = {
@@ -367,6 +367,7 @@ function windowResized() {
   stripes = [];
   currentStripe = 0;
   sevenSegmentDisplay = [];// 🔴Reset the seven-segment display
+  colon = []; // 🔴Reset the colon position，in case the colon move towards right.
   setup(); // regenerate stripes on resize
 }
 
