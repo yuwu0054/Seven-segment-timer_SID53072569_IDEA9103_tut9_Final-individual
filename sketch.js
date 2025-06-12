@@ -155,7 +155,7 @@ class SevenSegmentDisplay {
     this.segmentLength = w*0.7; // Length of each segment
     this.gap = w*0.1; // Spacing between segments. The"spacing" has been used in function setup().  For the sake of clarity, we use gap here.
 
-    this.coords = {//这段坐标还要调整一下现在有点乱
+    this.coords = {
       //a
       a:[ x + this.gap  , 
           y , 
@@ -194,13 +194,13 @@ class SevenSegmentDisplay {
     };
 
     //TEST
-    console.log(`a段坐标: [${this.coords.a}]`),
-    console.log(`b段坐标: [${this.coords.b}]`),
-    console.log(`c段坐标: [${this.coords.c}]`),
-    console.log(`d段坐标: [${this.coords.d}]`),
-    console.log(`e段坐标: [${this.coords.e}]`),
-    console.log(`f段坐标: [${this.coords.f}]`),
-    console.log(`g段坐标: [${this.coords.g}]`);   
+    console.log(`a segment's coord: [${this.coords.a}]`),
+    console.log(`b segment's coord: [${this.coords.b}]`),
+    console.log(`c segment's coord: [${this.coords.c}]`),
+    console.log(`d segment's coord: [${this.coords.d}]`),
+    console.log(`e segment's coord: [${this.coords.e}]`),
+    console.log(`f segment's coord: [${this.coords.f}]`),
+    console.log(`g segment's coord: [${this.coords.g}]`);   
 
     this.stripes = {}; // Object to store LineStripe objects for each segment
     let segments = Object.keys(this.coords); 
