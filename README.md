@@ -1,4 +1,5 @@
-# Seven-segment-timer_SID53072569_IDEA9103_tut9_Final-individual
+# Seven Segment Timer
+*--SID 530725969_IDEA9103_tut9_Final-individual*
 
 ## User Guide  
 ##### A simple timer — just click to use it as usual!  
